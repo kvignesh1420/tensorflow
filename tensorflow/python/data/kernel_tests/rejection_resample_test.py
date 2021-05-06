@@ -135,11 +135,10 @@ class RejectionResampleTest(test_base.DatasetTestBase, parameterized.TestCase):
     init_dist = [0.5, 0.5]
     target_dist = [0.9, 0.1]
     dataset = dataset_ops.Dataset.range(10000)
-    resampler = resampling.rejection_resample(
+    dataset = dataset.rejection_resample(
         class_func=lambda x: x % 2,
         target_dist=target_dist,
         initial_dist=init_dist)
-    dataset = dataset.apply(resampler)
 
     get_next = self.getNext(dataset)
     returned = []
