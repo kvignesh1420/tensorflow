@@ -2693,6 +2693,7 @@ name=None))
     distribution of `init_dist` needs to be resampled into a dataset with
     `target_dist` distribution.
 
+    >>> import collections
     >>> init_dist = [0.5, 0.5]
     >>> target_dist = [0.6, 0.4]
     >>> num_classes = len(init_dist)
