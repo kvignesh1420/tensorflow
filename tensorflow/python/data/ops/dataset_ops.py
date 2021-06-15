@@ -3641,14 +3641,6 @@ class Options(options_lib.OptionsBase):
       "`tf.data.experimental.DistributeOptions` for more details.",
       default_factory=distribute_options.DistributeOptions)
 
-  experimental_optimization = options_lib.create_option(
-      name="experimental_optimization",
-      ty=optimization_options.OptimizationOptions,
-      docstring=
-      "The optimization options associated with the dataset. See "
-      "`tf.data.experimental.OptimizationOptions` for more details.",
-      default_factory=optimization_options.OptimizationOptions)
-
   experimental_slack = options_lib.create_option(
       name="experimental_slack",
       ty=bool,
@@ -3675,11 +3667,23 @@ class Options(options_lib.OptionsBase):
       "`tf.data.ThreadingOptions` for more details.",
       default_factory=threading_options.ThreadingOptions)
 
+  optimization = options_lib.create_option(
+      name="optimization",
+      ty=optimization_options.OptimizationOptions,
+      docstring=
+      "The optimization options associated with the dataset. See "
+      "`tf.data.OptimizationOptions` for more details.",
+      default_factory=optimization_options.OptimizationOptions)
+
   def __getattr__(self, name):
     if name == "experimental_threading":
       logging.warning("options.experimental_threading is deprecated. "
                       "Use options.threading instead.")
       return getattr(self, "threading")
+    elif name == "experimental_optimization":
+      logging.warning("options.experimental_optimization is deprecated. "
+                      "Use options.optimization instead.")
+      return getattr(self, "optimization")
     else:
       raise AttributeError("Attribute %s not found." % name)
 
@@ -3688,6 +3692,10 @@ class Options(options_lib.OptionsBase):
       logging.warning("options.experimental_threading is deprecated. "
                       "Use options.threading instead.")
       super(Options, self).__setattr__("threading", value)
+    elif name == "experimental_optimization":
+      logging.warning("options.experimental_optimization is deprecated. "
+                      "Use options.optimization instead.")
+      super(Options, self).__setattr__("optimization", value)
     else:
       super(Options, self).__setattr__(name, value)
 
@@ -3700,7 +3708,7 @@ class Options(options_lib.OptionsBase):
       pb.external_state_policy = (
           distribute_options.ExternalStatePolicy._to_proto(  # pylint: disable=protected-access
               self.experimental_external_state_policy))
-    pb.optimization_options.CopyFrom(self.experimental_optimization._to_proto())  # pylint: disable=protected-access
+    pb.optimization_options.CopyFrom(self.optimization._to_proto())  # pylint: disable=protected-access
     if self.experimental_slack is not None:
       pb.slack = self.experimental_slack
     pb.threading_options.CopyFrom(self.threading._to_proto())  # pylint: disable=protected-access
@@ -3714,7 +3722,7 @@ class Options(options_lib.OptionsBase):
       self.experimental_external_state_policy = (
           distribute_options.ExternalStatePolicy._from_proto(  # pylint: disable=protected-access
               pb.external_state_policy))
-    self.experimental_optimization._from_proto(pb.optimization_options)  # pylint: disable=protected-access
+    self.optimization._from_proto(pb.optimization_options)  # pylint: disable=protected-access
     if pb.WhichOneof("optional_slack") is not None:
       self.experimental_slack = pb.slack
     self.threading._from_proto(pb.threading_options)  # pylint: disable=protected-access
@@ -3724,7 +3732,7 @@ class Options(options_lib.OptionsBase):
     # pylint: disable=protected-access
     object.__setattr__(self, "_mutable", mutable)
     self.experimental_distribute._set_mutable(mutable)
-    self.experimental_optimization._set_mutable(mutable)
+    self.optimization._set_mutable(mutable)
     self.threading._set_mutable(mutable)
 
   def merge(self, options):
